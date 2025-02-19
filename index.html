@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="Zh-CN" xmlns="">
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="./js/vue.min.js"></script>
+    <title>装备命令生成</title>
+    <link rel="stylesheet" href="./css/element-ui.css">
+    <link rel="shortcut icon" href="./favicon.ico">
+    <script type="text/javascript" src="js/element-ui.js"></script>
+</head>
+<body>
+    <div id="root">
+        <el-row :gutter="10" type="flex" justify="space-around">
+            <el-col :span="8">
+                <el-card class="box-card card-with-scrollbar" >
+                    <div slot="header" class="clearfix">
+                        <span> 基本配置</span>
+                    </div>
+                    <el-scrollbar style="height: 80vh;">
+                    <el-divider content-position="left">请输入prodId：</el-divider>
+                    <el-autocomplete
+                        popper-class="my-autocomplete"
+                        v-model="prodId"
+                        @input="convertToUppercase"
+                        :fetch-suggestions="queryProdId"
+                        :max="4"
+                        placeholder="请输入prodId"
+                        clearable>
+                        <template slot-scope="{ item }">
+                            <div class="name">{{ item.value }}</div>
+                            <span class="detail">{{ item.deviceType }}</span>
+                        </template>
+                    </el-autocomplete>
+                    <el-button @click="generateRandomSSIDs" type="primary">点击生成</el-button>
+                    <el-button type="text" @click="dialogVisible = true">获取prodId</el-button>
+                    <el-dialog
+                        title="请输入路由器IP地址"
+                        :visible.sync="dialogVisible"
+                        width="30%">
+                        <el-input placeholder="请输入路由器IP" type="number" v-model="ip" :min="0" :max="255">
+                            <template slot="prepend">192.168.</template>
+                            <template slot="append">.1</template>
+                        </el-input>
+                        <el-alert
+                            title="跳转后搜索prodId"
+                            type="warning"
+                            :closable="false">
+                        </el-alert>
+                        <span slot="footer" class="dialog-footer">
+                            <el-button @click="dialogVisible = false">取 消</el-button>
+                            <el-button type="primary" @click="goToExternalPage">确 定</el-button>
+                        </span>
+                    </el-dialog>
+                    <el-divider content-position="left">SSID生成个数：</el-divider>
+                    <el-slider
+                        v-model="num"
+                        show-input
+                        :min="1"
+                        :max="25">
+                    </el-slider>
+                    <!-- <el-input-number v-model="num" :min="1" :max="25"></el-input-number> -->
+                    <el-divider content-position="left">请输入SN起始值：</el-divider>
+                    <el-input-number v-model="snNumber" :min="0" :max="999999"></el-input-number>
+                    <el-button type="primary" @click="snNumber = 0">清零</el-button>
+                    <el-divider content-position="left">请输入区域码：</el-divider>
+                    <el-autocomplete
+                        v-model="wifiareacode"
+                        :fetch-suggestions="queryWifiareacode"
+                        placeholder="请输入区域码"
+                        @select="handleSelect"
+                        @clear="empty"
+                        clearable>
+                        <template slot-scope="{ item }">
+                            <div>{{ item.value }}</div>
+                          </template>
+                    </el-autocomplete>
+                    <el-divider content-position="left">请输入国家码：</el-divider>
+                    <el-autocomplete
+                        popper-class="my-autocomplete"
+                        v-model="wificountrycode"
+                        :fetch-suggestions="queryWificountrycode"
+                        placeholder="请输入国家码"
+                        clearable>
+                        <template slot-scope="{ item }">
+                            <div class="name">{{ item.value }}</div>
+                            <span class="detail">{{ item.country }}</span>
+                          </template>
+                    </el-autocomplete>
+                    <el-divider content-position="left">自定义显示：</el-divider>
+                    <el-checkbox-group v-model="telnetCheckList">
+                        <el-checkbox label="SN"></el-checkbox>
+                        <el-checkbox label="MAC"></el-checkbox>
+                        <el-checkbox label="default"></el-checkbox>
+                    </el-checkbox-group>
+                    <el-divider content-position="left">自定义内容：</el-divider>
+                    <el-switch
+                        v-model="isCustomize"
+                        active-text="开启自定义"
+                        inactive-text="关闭自定义">
+                    </el-switch>
+                    <div v-if="isCustomize">
+                        <el-divider content-position="left">请输入自定义内容：</el-divider>
+                        <el-input
+                            type="textarea"
+                            :autosize="{ minRows: 2, maxRows: 4}"
+                            placeholder="请输入内容"
+                            v-model="textarea">
+                      </el-input>                  
+                    </div>
+                    <el-divider content-position="left">是否每次生成SN前缀：</el-divider>
+                    <el-switch
+                        v-model="isSnPrefix"
+                        active-text="固定前缀"
+                        inactive-text="生成前缀">
+                    </el-switch>
+                    <div v-if="isSnPrefix">
+                        <el-divider content-position="left">请输入SN前缀：</el-divider>
+                        <el-input
+                            placeholder="请输入SN前缀"
+                            v-model="randomString"
+                            clearable
+                            maxlength="10"
+                            show-word-limit>
+                        </el-input>                    
+                    </div>
+                    <el-divider content-position="left">是否支持MAC缩减：</el-divider>
+                    <el-switch
+                        v-model="isMacOffset"
+                        active-text="显示缩减"
+                        inactive-text="隐藏缩减">
+                    </el-switch>
+                    <el-divider content-position="left">是否固定MAC前缀：</el-divider>
+                    <el-switch
+                        v-model="isUserOui"
+                        active-text="固定MAC"
+                        inactive-text="随机生成">
+                    </el-switch>
+                    <div v-if="isUserOui">
+                        <el-divider content-position="left">固定MAC前缀：</el-divider>
+                        <el-input
+                            v-model="userOui"
+                            disabled>
+                        </el-input>                    
+                    </div>
+                </el-scrollbar>
+                </el-card>
+            </el-col>
+            <el-col :span="8">
+                <el-card class="box-card" >
+                    <div slot="header" class="clearfix">
+                        <span> SSID列表</span>
+                    </div>
+                    <el-alert
+                        v-if="isProis" 
+                        title="请输入prodId"
+                        type="warning"
+                        :closable="false">
+                    </el-alert>
+                    <div 
+                    v-else 
+                    v-for="(ssid, index) in ssids" 
+                    :key="index">
+                        <el-link :type="ssid.linkType" class="text" @click="telnet(index, $event)">{{ssid.ssid}}</el-link>
+                    </div>
+                </el-card>
+            </el-col>
+            <el-col :span="8">
+                <el-card class="box-card" >
+                    <div slot="header" class="clearfix">
+                        <span> Telnet 命令</span>
+                    </div>
+                    <el-alert
+                        v-if="!isTelnet" 
+                        title="点击SSID生成命令"
+                        type="warning"
+                        :closable="false">
+                    </el-alert>
+                    <div v-else >
+                        <div v-if="!(telnetCheckList.indexOf('SN') === -1)"> 
+                            diag set sn {{sn}}
+                        </div>
+                        <div> 
+                            diag set vss1 ssid {{ssid}}
+                        </div>
+                        <div> 
+                            diag set vss1 5gssid {{ssid}}-5G
+                        </div>
+                        <div v-if="!(telnetCheckList.indexOf('MAC') === -1)"> 
+                            diag set macaddr {{mac}}
+                        </div>
+                        <div v-if="isWifiareacode"> 
+                            diag set wifiareacode {{wifiareacode}}
+                        </div>
+                        <div v-if="isWificountrycode"> 
+                            diag set wificountrycode {{wificountrycode}}
+                        </div>
+                        <div v-if="isMacOffset"> 
+                            diag set macnumber 1
+                        </div>
+                        <div v-if="isCustomize">
+                            <div v-html="formattedContent"></div>
+                        </div>
+                        <div v-if="!(telnetCheckList.indexOf('default') === -1)"> 
+                            diag restore default
+                        </div>
+                        <el-divider></el-divider>
+                        <div v-for="(item, index) in display" :key="index">
+                            diag display {{item}}
+                        </div>
+                        <div v-if="isMacOffset"> 
+                            diag display macnumber
+                        </div>
+                    </div>
+                  </el-card>
+            </el-col>
+        </el-row>
+    </div>
+    
+    <script type="text/javascript" src="./js/test.js"></script>
+    <style>
+        .el-col {
+            height: 97vh;
+        }
+        .el-card {
+            height: 100%;
+        }
+        .el-input__suffix {
+            right: 10px;
+        }
+        .el-slider__runway{
+            margin-left: 15px;
+        }
+        .text {
+            font-size: 16px;
+        }
+        .input-with-button {
+            display: flex;
+            align-items: center;
+        }
+        .input-with-button .el-input {
+            margin-right: 10px; /* 添加一些间距 */
+        }
+        .card-with-scrollbar .el-scrollbar__wrap {
+            overflow-x: hidden; /* 如果你不需要水平滚动条 */
+        }
+        .el-scrollbar__bar {
+            position: absolute;
+            right: 0px;
+        }
+        .my-autocomplete {
+            li {
+                line-height: normal;
+                padding: 7px;
+
+                .name {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                }
+                .detail {
+                font-size: 12px;
+                color: #b4b4b4;
+                }
+
+                .highlighted .detail {
+                color: #ddd;
+                }
+            }
+        }
+    </style>
+</body>
+</html>
