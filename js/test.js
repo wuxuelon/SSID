@@ -219,6 +219,23 @@ new Vue({
             this.wificountrycodes = []
             this.wificountrycode = ''
         },
+        fetchData() {
+            fetch('http://150.158.96.120/api/mymd5.php?string=hello', {
+                method: 'GET', // 或者 'POST', 'PUT', 'DELETE' 等，根据你的需求
+              })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok');
+                }
+                return response.json();
+              })
+              .then(json => {
+                console.log(json);
+              })
+              .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+              });
+        }
     },
     computed: {
         isProis(){
@@ -261,5 +278,6 @@ new Vue({
     },
     mounted() {
         this.generateRandomString()
+        this.fetchData()
     }
 })
