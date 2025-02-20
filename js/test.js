@@ -218,35 +218,6 @@ new Vue({
         empty(){
             this.wificountrycodes = []
             this.wificountrycode = ''
-        },
-        fetchData() {
-            const url = 'https://www.kdocs.cn/api/v3/ide/file/cvNy3BfpDDqK/script/V2-CEapF8X5bghtoZuorAuCI/sync_task'
-            // 定义请求的参数
-            const params = new URLSearchParams({
-                sheet_name: "区域码"
-            })
-            // 将参数添加到URL中
-            const urlWithParams = `${url}?${params}`
-
-            const headers = {
-                'Content-Type': 'application/json',
-                'AirScript-Token': '1kC1D7BPGvrnQuKUcaIYii'
-                // 你可以在这里添加更多的请求头
-              }
-
-            fetch(urlWithParams, { headers })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error('Network response was not ok');
-                }
-                return response.json();
-              })
-              .then(json => {
-                console.log(json);
-              })
-              .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-              });
         }
     },
     computed: {
@@ -290,6 +261,5 @@ new Vue({
     },
     mounted() {
         this.generateRandomString()
-        this.fetchData()
     }
 })
