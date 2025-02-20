@@ -220,9 +220,21 @@ new Vue({
             this.wificountrycode = ''
         },
         fetchData() {
-            fetch('https://v.api.aa1.cn/api/yiyan/index.php', {
-                method: 'GET', // 或者 'POST', 'PUT', 'DELETE' 等，根据你的需求
-              })
+            const url = 'https://www.kdocs.cn/api/v3/ide/file/cvNy3BfpDDqK/script/V2-CEapF8X5bghtoZuorAuCI/sync_task'
+            // 定义请求的参数
+            const params = new URLSearchParams({
+                sheet_name: "区域码"
+            })
+            // 将参数添加到URL中
+            const urlWithParams = `${url}?${params}`
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'AirScript-Token': '1kC1D7BPGvrnQuKUcaIYii'
+                // 你可以在这里添加更多的请求头
+              }
+
+            fetch('urlWithParams', { headers })
               .then(response => {
                 if (!response.ok) {
                   throw new Error('Network response was not ok');
