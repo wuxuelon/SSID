@@ -234,7 +234,7 @@ new Vue({
                 // 你可以在这里添加更多的请求头
               }
 
-            fetch('urlWithParams', { headers })
+            fetch(urlWithParams, { headers })
               .then(response => {
                 if (!response.ok) {
                   throw new Error('Network response was not ok');
