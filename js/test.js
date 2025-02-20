@@ -220,7 +220,7 @@ new Vue({
             this.wificountrycode = ''
         },
         fetchData() {
-            fetch('http://150.158.96.120/api/mymd5.php?string=hello', {
+            fetch('https://v.api.aa1.cn/api/yiyan/index.php', {
                 method: 'GET', // 或者 'POST', 'PUT', 'DELETE' 等，根据你的需求
               })
               .then(response => {
