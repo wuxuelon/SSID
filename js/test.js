@@ -110,13 +110,30 @@ new Vue({
         },
         generateRandomString() {
             // 生成前两位数字
-            const digits = Math.floor(Math.random() * 9000) + 1000 // 生成1000到9999之间的数字
+            const digits = Math.floor(Math.random() * 90) + 10 // 生成1000到9999之间的数字
             // 生成三位字符串（可以是字母或字母加数字）
             const letters = this.getRandomLetters(3, false) // 只生成大写字母
             // 生成后五位数字
-            const moreDigits = Math.floor(Math.random() * 100000) + 1// 生成1到99999之间的数字
+            // const moreDigits = Math.floor(Math.random() * 100000) + 1// 生成1到99999之间的数字
+            const today = new Date()
+            const year = today.getFullYear().toString().substring(2) // 获取年份的后两位
+            const month = today.getMonth() + 1 // getMonth() 返回0-11，因此需要加1
+            const date = today.getDate().toString().padStart(2, '0')
+
+              // 将月份转换为字母（10月为A，11月为B，12月为C）
+            let monthLetter = '';
+            if (month === 10) {
+                monthLetter = 'A';
+            } else if (month === 11) {
+                monthLetter = 'B';
+            } else if (month === 12) {
+                monthLetter = 'C';
+            } else {
+                // 其他月份保持不变，这里假设不需要转换
+                monthLetter = month.toString();
+            }
             // 拼接字符串
-            this.randomString = digits.toString().substring(0, 2) + letters + moreDigits.toString().padStart(5, '0')
+            this.randomString = digits.toString() + letters + year + monthLetter + date
         },
         getRandomLetters(length, includeNumbers) {
             let result = ''
