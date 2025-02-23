@@ -176,40 +176,46 @@
                         :closable="false">
                     </el-alert>
                     <div v-else >
-                        <div v-if="!(telnetCheckList.indexOf('SN') === -1)"> 
-                            diag set sn {{sn}}
+                        <div ref="copy1" class="cp">
+                            <div v-if="!(telnetCheckList.indexOf('SN') === -1)"> 
+                                diag set sn {{sn}}
+                            </div>
+                            <div> 
+                                diag set vss1 ssid {{ssid}}
+                            </div>
+                            <div> 
+                                diag set vss1 5gssid {{ssid}}-5G
+                            </div>
+                            <div v-if="!(telnetCheckList.indexOf('MAC') === -1)"> 
+                                diag set macaddr {{mac}}
+                            </div>
+                            <div v-if="isWifiareacode"> 
+                                diag set wifiareacode {{wifiareacode}}
+                            </div>
+                            <div v-if="isWificountrycode"> 
+                                diag set wificountrycode {{wificountrycode}}
+                            </div>
+                            <div v-if="isMacOffset"> 
+                                diag set macnumber 1
+                            </div>
+                            <div v-if="isCustomize">
+                                <div v-html="formattedContent"></div>
+                            </div>
+                            <div v-if="!(telnetCheckList.indexOf('default') === -1)"> 
+                                diag restore default
+                            </div>
                         </div>
-                        <div> 
-                            diag set vss1 ssid {{ssid}}
-                        </div>
-                        <div> 
-                            diag set vss1 5gssid {{ssid}}-5G
-                        </div>
-                        <div v-if="!(telnetCheckList.indexOf('MAC') === -1)"> 
-                            diag set macaddr {{mac}}
-                        </div>
-                        <div v-if="isWifiareacode"> 
-                            diag set wifiareacode {{wifiareacode}}
-                        </div>
-                        <div v-if="isWificountrycode"> 
-                            diag set wificountrycode {{wificountrycode}}
-                        </div>
-                        <div v-if="isMacOffset"> 
-                            diag set macnumber 1
-                        </div>
-                        <div v-if="isCustomize">
-                            <div v-html="formattedContent"></div>
-                        </div>
-                        <div v-if="!(telnetCheckList.indexOf('default') === -1)"> 
-                            diag restore default
-                        </div>
+                        <el-button type="primary" @click="copyText('copy1')">复制</el-button>
                         <el-divider></el-divider>
-                        <div v-for="(item, index) in display" :key="index">
-                            diag display {{item}}
+                        <div ref="copy2" class="cp">
+                            <div v-for="(item, index) in display" :key="index">
+                                diag display {{item}}
+                            </div>
+                            <div v-if="isMacOffset"> 
+                                diag display macnumber
+                            </div>
                         </div>
-                        <div v-if="isMacOffset"> 
-                            diag display macnumber
-                        </div>
+                        <el-button type="primary" @click="copyText('copy2')">复制</el-button>
                     </div>
                   </el-card>
             </el-col>
@@ -265,6 +271,9 @@
                 color: #ddd;
                 }
             }
+        }
+        .cp {
+            margin-bottom: 10px;
         }
     </style>
 </body>
