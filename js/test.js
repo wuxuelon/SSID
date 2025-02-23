@@ -218,6 +218,9 @@ new Vue({
         empty(){
             this.wificountrycodes = []
             this.wificountrycode = ''
+        },
+        async copyText(ref) {
+            await navigator.clipboard.writeText(this.$refs[ref].innerText)
         }
     },
     computed: {
