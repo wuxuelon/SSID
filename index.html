@@ -32,7 +32,7 @@
                         </template>
                     </el-autocomplete>
                     <el-button @click="generateRandomSSIDs" type="primary">点击生成</el-button>
-                    <el-button type="text" @click="dialogVisible = true">获取prodId</el-button>
+                    <el-button type="text" @click="dialogVisible = true">获取prodID</el-button>
                     <el-dialog
                         title="请输入路由器IP地址"
                         :visible.sync="dialogVisible"
@@ -156,12 +156,15 @@
                         type="warning"
                         :closable="false">
                     </el-alert>
-                    <div 
+                    <div
+                    class="ssid-list"
                     v-else 
                     v-for="(ssid, index) in ssids" 
-                    :key="index">
-                        <el-link :type="ssid.linkType" class="text" @click="telnet(index, $event)">{{ssid.ssid}}</el-link>
+                    :key="index"
+                    :ref=`ssid-copy${index}`>
+                        <el-link :type="ssid.linkType" class="text" @click="telnet(index, $event)">{{ssid.ssid}}<i class="el-icon-copy-document"></i></el-link>
                     </div>
+                  </el-table>
                 </el-card>
             </el-col>
             <el-col :span="8">
@@ -274,6 +277,14 @@
         }
         .cp {
             margin-bottom: 10px;
+        }
+        .ssid-list .el-icon-copy-document{
+            visibility: hidden;
+            opacity: 0;
+        }
+        .ssid-list .el-link:hover  .el-icon-copy-document{
+            visibility: visible; /* 显示图标 */
+            opacity: 1; /* 不透明 */
         }
     </style>
 </body>
