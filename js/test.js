@@ -10,7 +10,7 @@ new Vue({
         display: ["sn","vss1 ssid","vss1 5gssid","macaddr","wifiareacode","wificountrycode",],
         num: 1, 
         ip: 3,
-        ssids:{},
+        ssids: [],
         ssid:'',
         hashedText: '',
         snNumber: 0,
@@ -78,7 +78,7 @@ new Vue({
                 return 0
             }
             for (let i = 0; i < this.num; i++) {
-                this.ssids = {}
+                this.ssids = []
                 let randomString = this.getRandomLetters(3, true)
                 let lastCharAscii = randomString.charCodeAt(randomString.length - 1) % 3
                 let offsetValue = this.shiftString(lastCharAscii)
@@ -86,7 +86,8 @@ new Vue({
                 let ssid = ''
                 this.hashText(hashedText).then(data => {
                     ssid = 'HUAWEI-' + hashedText + data
-                    Vue.set(this.ssids,`ssid${i}`,{"ssid":ssid,"linkType":"primary"})
+                    // Vue.set(this.ssids,`ssid${i}`,{"ssid":ssid,"linkType":"primary"})
+                    Vue.set(this.ssids, this.ssids.length, {"ssid":ssid,"linkType":"primary"})
                 })
             }
         },
@@ -102,6 +103,7 @@ new Vue({
                 this.$message.error('输入的前缀不符合规范，请输入正确格式的前缀')
                 return 
             }
+            this.copyText('ssid-copy', index)
             this.generateRandomMac()
             this.ssid = event.target.textContent
             this.snNumber += 1
@@ -219,8 +221,14 @@ new Vue({
             this.wificountrycodes = []
             this.wificountrycode = ''
         },
-        async copyText(ref) {
-            await navigator.clipboard.writeText(this.$refs[ref].innerText)
+        async copyText(ref, index) {
+            if(ref == 'ssid-copy') {
+                ref = ref + index
+                await navigator.clipboard.writeText(this.$refs[ref][0].innerText)
+            } else {
+                await navigator.clipboard.writeText(this.$refs[ref].innerText)
+            }
+            // await navigator.clipboard.writeText(this.$refs[ref].innerText)
         }
     },
     computed: {
