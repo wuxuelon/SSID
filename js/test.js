@@ -15,6 +15,12 @@ new Vue({
         hashedText: '',
         snNumber: 0,
         mac:'',
+        tempPairname: '',
+        tempPairpwd: '',
+        pairname: '',
+        pairpwd: '',
+        ParentRouterMac: '',
+        ChildRouterMac: '',
         macs: [
             "70:66:B9",
             "C4:A1:AE",
@@ -70,7 +76,11 @@ new Vue({
         isCustomize: false,
         isTelnet: false,
         isMacOffset: false,
-        dialogVisible: false
+        dialogVisible: false,
+        isSingleRouter: true,
+        isPairname: false,
+        isPairpwd: false,
+        isPairInfo: false
         },
     methods: {
         generateRandomSSIDs() {
@@ -191,6 +201,61 @@ new Vue({
             window.open(url, '_blank')
             this.dialogVisible = false
         },
+        generateString() {
+            if (this.isPairname && this.tempPairname.length < 8) {
+                this.$message.warning('请输入正确的组网名称')
+                this.isPairInfo = false
+                return 
+            }
+            if (this.isPairpwd && this.tempPairpwd.length < 8) {
+                this.$message.warning('请输入正确的组网密码')
+                this.isPairInfo = false
+                return 
+            }
+            if (!this.isValidMacAddress(this.ParentRouterMac)) {
+                this.$message.warning('请输入正确的母路由MAC')
+                this.isPairInfo = false
+                return 
+            }
+            if (!this.isValidMacAddress(this.ChildRouterMac)) {
+                this.$message.warning('请输入正确的子路由MAC')
+                this.isPairInfo = false
+                return 
+            }
+            const length = Math.floor(Math.random() * (16 - 8 + 1)) + 8 // 随机长度8-16
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+            let pairname = ''
+            let pairpwd = ''
+            
+            // 生成除最后两位外的字符
+            for (let i = 0; i < length - 2; i++) {
+                pairname += chars.charAt(Math.floor(Math.random() * chars.length))
+            }
+            
+            for (let i = 0; i < 8; i++) {
+                pairpwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            // 生成最后两位，确保不包含0或o
+            const validLastChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789'
+            for (let i = 0; i < 2; i++) {
+                pairname += validLastChars.charAt(Math.floor(Math.random() * validLastChars.length))
+            }
+            if(!this.isPairname) {
+                this.pairname = pairname
+                this.tempPairname = pairname
+            } else {
+                this.pairname = this.tempPairname
+            }
+            if(!this.isPairpwd) {
+                this.pairpwd = pairpwd
+                this.tempPairpwd = pairpwd
+            } else {
+                this.pairpwd = this.tempPairpwd
+            }
+            // this.pairname = pairname
+            // this.pairpwd = pairpwd
+            this.isPairInfo = true
+        },
         queryWifiareacode(queryString, cb){
             let wifiareacode = this.wifiareacodes
             let results = queryString ? wifiareacode.filter(this.createFilter(queryString)) : wifiareacode
@@ -221,6 +286,10 @@ new Vue({
             this.wificountrycodes = []
             this.wificountrycode = ''
         },
+        isValidMacAddress(mac) {
+            const macAddressRegex = /^[0-9A-Fa-f]{12}$/
+            return macAddressRegex.test(mac)
+        },
         async copyText(ref, index) {
             if(ref == 'ssid-copy') {
                 ref = ref + index
@@ -232,7 +301,7 @@ new Vue({
         }
     },
     computed: {
-        isProis(){
+        isProis() {
             this.ssids = {}
             this.isTelnet = false
             const regex = /^[A-Z0-9]{4}$/
