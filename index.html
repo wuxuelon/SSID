@@ -10,11 +10,17 @@
 </head>
 <body>
     <div id="root">
-        <el-row :gutter="10" type="flex" justify="space-around">
-            <el-col :span="8">
+        <el-row :gutter="10" type="flex" justify="space-around" v-if="isSingleRouter">
+            <el-col :span="8" >
                 <el-card class="box-card card-with-scrollbar" >
                     <div slot="header" class="clearfix">
                         <span> 基本配置</span>
+                        <el-switch
+                            v-model="isSingleRouter"
+                            style="float: right; padding: 3px 0"
+                            active-text="装备生成"
+                            inactive-text="套装信息">
+                        </el-switch>
                     </div>
                     <el-scrollbar style="height: 80vh;">
                     <el-divider content-position="left">请输入prodId：</el-divider>
@@ -137,10 +143,7 @@
                     </el-switch>
                     <div v-if="isUserOui">
                         <el-divider content-position="left">固定MAC前缀：</el-divider>
-                        <el-input
-                            v-model="userOui"
-                            disabled>
-                        </el-input>                    
+                        <el-input v-model="userOui"></el-input>                    
                     </div>
                 </el-scrollbar>
                 </el-card>
@@ -223,6 +226,108 @@
                   </el-card>
             </el-col>
         </el-row>
+
+        <el-row :gutter="10" type="flex" justify="space-around" v-else>
+            <el-col :span="10" >
+                <el-card class="box-card card-with-scrollbar" >
+                    <div slot="header" class="clearfix">
+                        <span> 基本配置</span>
+                        <el-switch
+                            v-model="isSingleRouter"
+                            style="float: right; padding: 3px 0"
+                            active-text="装备生成"
+                            inactive-text="套装信息">
+                        </el-switch>
+                    </div>
+                    <el-scrollbar style="height: 80vh;">
+                    <el-divider content-position="left">是否生成组网名称：</el-divider>
+                    <el-switch
+                        v-model="isPairname"
+                        active-text="手动输入"
+                        inactive-text="随机生成">
+                    </el-switch>
+                    <div v-if="isPairname">
+                        <el-divider content-position="left">组网名称：</el-divider>
+                        <el-input
+                            v-model="tempPairname"
+                            minlength="8"
+                            maxlength="16"
+                            show-word-limit
+                        >
+                        </el-input>
+                    </div>
+                    <el-divider content-position="left">是否生成组网密码：</el-divider>
+                    <el-switch
+                        v-model="isPairpwd"
+                        active-text="手动输入"
+                        inactive-text="随机生成">
+                    </el-switch>
+                    <div v-if="isPairpwd">
+                        <el-divider content-position="left">组网密码：</el-divider>
+                        <el-input 
+                            v-model="tempPairpwd"
+                            minlength="8"
+                            maxlength="8"
+                            show-word-limit
+                        >
+                        </el-input>                    
+                    </div>
+                    <el-divider content-position="left">请输入母路由MAC：</el-divider>
+                        <el-input
+                            v-model="ParentRouterMac"
+                            minlength="12"
+                            maxlength="12"
+                            show-word-limit
+                        >
+                        </el-input> 
+                    <el-divider content-position="left">请输入子路由MAC：</el-divider>
+                        <el-input
+                            v-model="ChildRouterMac"
+                            minlength="12"
+                            maxlength="12"
+                            show-word-limit
+                        >
+                        </el-input> 
+                    <div class="container">
+                        <el-button @click="generateString" type="primary">点击生成</el-button>
+                    </div>
+                    </el-scrollbar>
+                </el-card>
+            </el-col>
+            <el-col :span="10">
+                <el-card class="box-card" >
+                    <div slot="header" class="clearfix">
+                        <span>套装信息</span>
+                    </div>
+                    <el-alert
+                        v-if="!isPairInfo" 
+                        title="点击生成命令"
+                        type="warning"
+                        :closable="false">
+                    </el-alert>
+                    <div v-else>
+                        <div ref="copy1" class="cp">
+                            <div> 
+                                diag set pairname {{pairname}}
+                            </div>
+                            <div> 
+                                diag set pairname {{pairpwd}}
+                            </div>
+                            <div> 
+                                diag set skutype 02
+                            </div>
+                            <div> 
+                                diag set pairname 1/{{ParentRouterMac}}
+                            </div>
+                            <div> 
+                                diag set pairname 2/{{ChildRouterMac}}
+                            </div>
+                        </div>
+                        <el-button type="primary" @click="copyText('copy1')">复制</el-button>
+                    </div>
+                  </el-card>
+            </el-col>
+        </el-row>
     </div>
     
     <script type="text/javascript" src="./js/test.js"></script>
@@ -285,6 +390,10 @@
         .ssid-list .el-link:hover  .el-icon-copy-document{
             visibility: visible; /* 显示图标 */
             opacity: 1; /* 不透明 */
+        }
+        .container {
+            margin-top: 10px;
+            text-align: center;
         }
     </style>
 </body>
